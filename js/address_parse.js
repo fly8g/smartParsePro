@@ -21,11 +21,7 @@ getJson.then((res) => {
     })
     zipCodeList = zipCodeFormat(res.code);
 }) */
-addressList = pcassCode;
-addressList.forEach(item => {
-  formatAddresList(item, 1, '');
-});
-zipCodeList = zipCodeFormat(zipCode);
+
 
 /**
  * 地址数据处理
@@ -65,6 +61,7 @@ function formatAddresList(addressList, index, province) {
     });
   }
 }
+
 /**
  * 解析邮编
  * @param
@@ -85,6 +82,13 @@ function zipCodeFormat(zipCode) {
   });
   return list;
 }
+
+
+addressList = pcassCode;
+addressList.forEach(item => {
+  formatAddresList(item, 1, '');
+});
+zipCodeList = zipCodeFormat(zipCode);
 
 var smartObj = {};
 /**
