@@ -1,10 +1,69 @@
+/*
+function indexOf(arr, value) {
+	if (!arr || !value) {
+		return -1;
+	}
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i] === value){
+			return i;
+		}
+	}
+	return -1;
+}
+*/
+
+function indexOf(pStr, cStr, n) {
+	if (!pStr || !cStr) {
+		return -1;
+	}
+	
+	// n为起始位置
+	let i = 0; // 循环变量
+	let len1 = pStr.length; // 父串长度
+	let len2 = cStr.length; // 子串长度
+
+	if (n == undefined || n == null || n === -1) {
+		i = 0;
+	} else if (n > len1 - 1) { // 如果起始位置大于父串最后一位，返回-1，不存在
+		return -1;
+	} else { // 如果不存在上述情况，从第n位开始
+		i = n;
+	}
+
+	if (len2 > len1) { // 如果子串长度大于父串，那么肯定不存在，返回-1
+		return -1;
+	} else if (len2 === len1) { // 如果相等，那就直接对比两个字符串是否相等
+		if (cStr === pStr) { // 如果内容相等，那么就是从第一位开始的
+			return 0;
+		} else { // 如果长度不相等，那么返回-1
+			return -1;
+		}
+	} else {
+		let tempStr = '';
+		while (i < len1) {
+			// 截取父串，起始位置为i，每次长度为子串长度
+			tempStr = pStr.substr(i, len2);
+			if (cStr === tempStr) {
+				return i; // 返回字符串第一次出现的位置
+			}
+			i++; 
+		}
+
+		if (i === len1) { // 直到父元素的最后一位还没有出现相等，那么就是不存在返回-1
+		  return -1;
+		}
+	}
+}
+
+
+
 var addressList = []; //地址列表
 var zipCodeList = []; //邮编列表
 
 //获取地址以及邮编json
-/* const getJson = new Promise((res, rej) => {
-    $.getJSON("./json/pcas-code.json", data_address => {
-        $.getJSON("./json/zip-code.json", data_code => {
+/* const getJson = new Promise((res, rej) function(event, index, input) {
+    $.getJSON("./json/pcas-code.json", data_address function(event, index, input) {
+        $.getJSON("./json/zip-code.json", data_code function(event, index, input) {
 
             res({
                 'address': data_address,
@@ -14,9 +73,9 @@ var zipCodeList = []; //邮编列表
     })
 })
 
-getJson.then((res) => {
+getJson.then((res) function(event, index, input) {
     addressList = res.address;
-    addressList.forEach(item => {
+    addressList.forEach(function(item, index, input) {
         formatAddresList(item, 1, '')
     })
     zipCodeList = zipCodeFormat(res.code);
@@ -35,28 +94,25 @@ function formatAddresList(addressList, index, province) {
     //省
     addressList.province = addressList.name;
     addressList.type ='province';
-  }
-  if (index === 2) {
+  } else if (index === 2) {
     //市
     if (addressList.name == '市辖区') {
       addressList.name = province.name;
     }
     addressList.city = addressList.name;
     addressList.type ='city';
-  }
-  if (index === 3) {
+  } else if (index === 3) {
     //区或者县
     addressList.county = addressList.name;
     addressList.type ='county';
-  }
-  if (index === 4) {
+  } else if (index === 4) {
     //街道
     addressList.street = addressList.name;
     addressList.type ='street';
   }
   if (addressList.children) {
     index++;
-    addressList.children.forEach(res => {
+    addressList.children.forEach(function(res, index1, input) {
       formatAddresList(res, index, addressList);
     });
   }
@@ -69,11 +125,11 @@ function formatAddresList(addressList, index, province) {
  */
 function zipCodeFormat(zipCode) {
   let list = [];
-  zipCode.forEach(el => {
+  zipCode.forEach(function(el, index, input) {
     if (el.child) {
-      el.child.forEach(event => {
+      el.child.forEach(function(event, index, input) {
         if (event.child) {
-          event.child.forEach(element => {
+          event.child.forEach(function(element, index, input) {
             list.push(element.zipcode);
           });
         }
@@ -85,7 +141,7 @@ function zipCodeFormat(zipCode) {
 
 
 addressList = pcassCode;
-addressList.forEach(item => {
+addressList.forEach(function(item, index, input) {
   formatAddresList(item, 1, '');
 });
 zipCodeList = zipCodeFormat(zipCode);
@@ -99,21 +155,34 @@ var smartObj = {};
 function smart(event) {
   event = stripscript(event); //过滤特殊字符
   let obj = {};
+  let objStr = "";
   let copyaddress = JSON.parse(JSON.stringify(event));
   copyaddress = copyaddress.split(' ');
 
-  copyaddress.forEach((res, index) => {
+  copyaddress.forEach(function(res, index, input) {
     if (res) {
       if (res.length == 1) {
         res += 'XX'; // 过滤掉一位的名字或者地址
       }
       let addressObj = smatrAddress(res);
-      obj = Object.assign(obj, addressObj);
-      if (JSON.stringify(addressObj) === '{}') {
-        obj.name = res.replace('XX', '');
+	  let objStrTmp = JSON.stringify(addressObj);
+      if (objStrTmp === '{}') {
+		addressObj.name = res.replace('XX', '');
       }
+	  objStrTmp = JSON.stringify(addressObj);
+	  let objStrTmp2 = objStrTmp.replace("{", "").replace("}", "");
+	  if (objStr != "") {
+		objStr += ", ";
+	  }
+	  if (objStrTmp2 != "") {
+		objStr += objStrTmp2;
+	  }
     }
   });
+
+  if (objStr) {
+	obj = JSON.parse("{" + objStr + "}");
+  }
   return obj;
 }
 
@@ -139,9 +208,9 @@ function smatrAddress(event) {
   }
 
   //邮编匹配
-  zipCodeList.forEach(res => {
-    if (address.indexOf(res) != -1) {
-      let num = address.indexOf(res);
+  zipCodeList.forEach(function(res, index, input) {
+    if (indexOf(address, res) != -1) {
+      let num = indexOf(address, res);
       let code = address.slice(num, num + 6);
       smartObj.zipCode = code;
       address = address.replace(code, '');
@@ -155,8 +224,8 @@ function smatrAddress(event) {
   for (let endIndex = 0; endIndex < address.length; endIndex++) {
     //  if (endIndex > begIndex) {
     matchAddress = address.slice(0, endIndex + 2);
-    addressList.forEach(res => {
-      if (res['province'].indexOf(matchAddress) != -1) {
+    addressList.forEach(function(res, index, input) {
+      if (indexOf(res['province'], matchAddress) != -1) {
         matchProvince.push({
           province: res.province,
           provinceCode: res.code,
@@ -169,9 +238,9 @@ function smatrAddress(event) {
   //  }
 
   //统计筛选初略统计出的省份
-  matchProvince.forEach(res => {
+  matchProvince.forEach(function(res, index, input) {
     res.index = 0;
-    matchProvince.forEach(el => {
+    matchProvince.forEach(function(el, index, input) {
       if (res.province == el.province) {
         el.index++;
         if (res.matchValue.length > el.matchValue.length) {
@@ -181,7 +250,9 @@ function smatrAddress(event) {
     });
   });
   if (matchProvince.length != 0) {
-    let province = matchProvince.reduce((p, v) => (p.index < v.index ? v : p));
+    let province = matchProvince.reduce(function(p, v) {
+    	return p.index < v.index ? v : p;
+    });
     smartObj.province = province.province;
     smartObj.provinceCode = province.provinceCode;
     address = address.replace(province.matchValue, '');
@@ -191,7 +262,7 @@ function smatrAddress(event) {
   matchAddress = '';
   for (let endIndex = 0; endIndex < address.length; endIndex++) {
     matchAddress = address.slice(0, endIndex + 2);
-    addressList.forEach(el => {
+    addressList.forEach(function(el, index, input) {
       //  if (el.name == smartObj.province) {
       if (el.code == smartObj.provinceCode || !smartObj.provinceCode ) {
         if (
@@ -200,9 +271,9 @@ function smatrAddress(event) {
           smartObj.province == '上海市' ||
           smartObj.province == '重庆市'
         ) {
-          el.children.forEach(item => {
-            item.children.forEach(res => {
-              if (res['county'].indexOf(matchAddress) != -1) {
+          el.children.forEach(function(item, index, input) {
+            item.children.forEach(function(res, index, input) {
+              if (indexOf(res['county'], matchAddress) != -1) {
                 matchCity.push({
                   county: res.county,
                   countyCode: res.code,
@@ -216,8 +287,8 @@ function smatrAddress(event) {
             });
           });
         } else {
-          el.children.forEach(res => {
-            if (res['city'].indexOf(matchAddress) != -1) {
+          el.children.forEach(function(res, index, input) {
+            if (indexOf(res['city'], matchAddress) != -1) {
               matchCity.push({
                 city: res.city,
                 cityCode: res.code,
@@ -234,9 +305,9 @@ function smatrAddress(event) {
   }
 
   //统计筛选初略统计出的市
-  matchCity.forEach(res => {
+  matchCity.forEach(function(res, index, input) {
     res.index = 0;
-    matchCity.forEach(el => {
+    matchCity.forEach(function(el, index, input) {
       if (res.city == el.city) {
         el.index++;
         if (res.matchValue.length > el.matchValue.length) {
@@ -246,7 +317,9 @@ function smatrAddress(event) {
     });
   });
   if (matchCity.length != 0) {
-    let city = matchCity.reduce((p, v) => (p.index < v.index ? v : p));
+    let city = matchCity.reduce(function(p, v) {
+    	return p.index < v.index ? v : p;
+    });
     smartObj.city = city.city;
     smartObj.cityCode = city.cityCode;
     smartObj.county = city.county;
@@ -263,7 +336,7 @@ function smatrAddress(event) {
   matchAddress = '';
   for (let endIndex = 0; endIndex < address.length; endIndex++) {
     matchAddress = address.slice(0, endIndex + 2);
-    addressList.forEach(el => {
+    addressList.forEach(function(el, index, input) {
       //  if (el.name == smartObj.province) {
       if (
         smartObj.province == '北京市' ||
@@ -273,10 +346,10 @@ function smatrAddress(event) {
       ) {
         //nothing
       } else {
-        el.children.forEach(item => {
+        el.children.forEach(function(item, index, input) {
           //  if (item.name == smartObj.city) {
-          item.children.forEach(res => {
-            if (res['county'].indexOf(matchAddress) != -1) {
+          item.children.forEach(function(res, index, input) {
+            if (indexOf(res['county'], matchAddress) != -1) {
               //省/市  || 省 
               if (smartObj.province) {
                 if (res.code.slice(0, 4) == smartObj.cityCode) {
@@ -310,9 +383,9 @@ function smatrAddress(event) {
     });
   }
   //统计筛选初略统计出的区县
-  matchCounty.forEach(res => {
+  matchCounty.forEach(function(res, index, input) {
     res.index = 0;
-    matchCounty.forEach(el => {
+    matchCounty.forEach(function(el, index, input) {
       if (res.city == el.city) {
         el.index++;
         if (res.matchValue.length > el.matchValue.length) {
@@ -322,7 +395,9 @@ function smatrAddress(event) {
     });
   });
   if (matchCounty.length != 0) {
-    let city = matchCounty.reduce((p, v) => (p.index < v.index ? v : p));
+    let city = matchCounty.reduce(function(p, v) {
+    	return p.index < v.index ? v : p;
+    });
     smartObj.county = city.county;
     smartObj.countyCode = city.countyCode;
     if (!smartObj.province) {
@@ -341,7 +416,7 @@ function smatrAddress(event) {
   matchAddress = '';
   for (let endIndex = 0; endIndex < address.length; endIndex++) {
     matchAddress = address.slice(0, endIndex + 3);
-    addressList.forEach(el => {
+    addressList.forEach(function(el, index, input) {
       if (el.name == smartObj.province) {
         if (
           smartObj.province == '北京市' ||
@@ -351,12 +426,12 @@ function smatrAddress(event) {
         ) {
           //nothing
         } else {
-          el.children.forEach(element => {
+          el.children.forEach(function(element, index, input) {
             if (element.name == smartObj.city) {
-              element.children.forEach(item => {
+              element.children.forEach(function(item, index, input) {
                 if (item.name == smartObj.county) {
-                  item.children.forEach(res => {
-                    if (res['street'].indexOf(matchAddress) != -1) {
+                  item.children.forEach(function(res, index, input) {
+                    if (indexOf(res['street'], matchAddress) != -1) {
                       matchStreet.push({
                         street: res.street,
                         streetCode: res.code,
@@ -374,9 +449,9 @@ function smatrAddress(event) {
   }
 
   //统计筛选初略统计出的区县
-  matchStreet.forEach(res => {
+  matchStreet.forEach(function(res, index, input) {
     res.index = 0;
-    matchStreet.forEach(el => {
+    matchStreet.forEach(function(el, index, input) {
       if (res.city == el.city) {
         el.index++;
         if (res.matchValue.length > el.matchValue.length) {
@@ -387,7 +462,9 @@ function smatrAddress(event) {
   });
 
   if (matchStreet.length != 0) {
-    let city = matchStreet.reduce((p, v) => (p.index < v.index ? v : p));
+    let city = matchStreet.reduce(function(p, v) {
+    	return p.index < v.index ? v : p;
+    });
     smartObj.street = city.street;
     smartObj.streetCode = city.streetCode;
     address = address.replace(city.matchValue, '');
